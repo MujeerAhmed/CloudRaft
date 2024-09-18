@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kv-store
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kv-store
+  template:
+    metadata:
+      labels:
+        app: kv-store
+    spec:
+      containers:
+      - name: kv-store-1
+        image: kv-store:r1
+        ports:
+        - containerPort: 5000
+        imagePullPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kv-store-service
+spec:
+  selector:
+    app: kv-store
+  ports:
+  - name: http
+    port: 80
+    targetPort: 5000
+
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: kv-store-ingress
+spec:
+  ingressClassName: nginx
+  rules:
+   - http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: kv-store-service
+            port:
+              number: 80
+
+
+
